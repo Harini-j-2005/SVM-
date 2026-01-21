@@ -1,17 +1,21 @@
 from flask import Flask, render_template, request
 import pickle
+import os
 
-app = Flask(__name__)
+# ---------- Flask App Initialization ----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 
-# Load trained model
-with open("model/svm_model.pkl", "rb") as f:
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
+
+# ---------- Load Model & Vectorizer ----------
+with open(os.path.join(BASE_DIR, "model", "svm_model.pkl"), "rb") as f:
     model = pickle.load(f)
 
-# Load vectorizer
-with open("model/tfidf_vectorizer.pkl", "rb") as f:
+with open(os.path.join(BASE_DIR, "model", "tfidf_vectorizer.pkl"), "rb") as f:
     vectorizer = pickle.load(f)
 
-# Class labels (20 Newsgroups)
+# ---------- Class Labels ----------
 categories = [
     'alt.atheism', 'comp.graphics', 'comp.os.ms-windows.misc',
     'comp.sys.ibm.pc.hardware', 'comp.sys.mac.hardware',
@@ -23,6 +27,7 @@ categories = [
     'talk.religion.misc'
 ]
 
+# ---------- Routes ----------
 @app.route("/", methods=["GET", "POST"])
 def index():
     prediction = None
@@ -35,5 +40,6 @@ def index():
 
     return render_template("index.html", prediction=prediction)
 
+# ---------- Run App ----------
 if __name__ == "__main__":
     app.run(debug=True)
